@@ -3,9 +3,6 @@ local KEY =		require"lib.vkeys"
 local memory =	require"memory"
 local ffb = 	require"ffb"
 local Vector =	require"lib.vector3d"
-if isSampAvailable() then
-	local sampev = require"lib.samp.events"
-end
 local Pointer = 0
 local Bytes1 = {137, 142, 156, 4, 0, 0}
 local Bytes2 = {137, 134, 156, 4, 0, 0}
@@ -75,35 +72,6 @@ function GetVehicleRotation(vehicle)
 	return rx,ry,rz
 end
 
-if isSampAvailable() then
-	sampev.onVehicleSync = function(playerid,vehicleid,bs)
-		if Enabled then
-			local yeah,car = sampGetCarHandleBySampVehicleId(vehicleid)
-			if yeah then
-				local WheelAngleAdress = getCarPointer(car)+1172
-				local ang = bs.leftRightKeys
-				if ang > 128 then
-					ang = 65536 - ang
-					ang = -ang
-				end
-				ang = ang / -166
-				memory.setfloat(WheelAngleAdress,ang,true)
-			end
-		end
-	end
-	sampev.onSendVehicleSync = function(bs)
-		if Enabled and isCharInAnyCar(PLAYER_PED) then
-			local MyCar = storeCarCharIsInNoSave(PLAYER_PED)
-			local WheelAngleAdress = getCarPointer(MyCar)+1172
-			local temp = -math.floor(memory.getfloat(WheelAngleAdress,true)*256)
-			if temp > 128 then temp = 128 end
-			if temp < -128 then temp = -128 end
-			bs.leftRightKeys = temp
-			--bs.upDownKeys = math.random(-5235,250420)
-		end
-	end
-end
-
 function Hacc(bool)
 	if bool then
 		for i = 1,6 do 
@@ -141,12 +109,7 @@ function LowerNearZero(i,limit)
 end
 
 function main()
-	-- if not isSampLoaded() or not isSampfuncsLoaded() then return end
-	-- while not isSampAvailable() do
-		-- wait(100)
-	-- end
 	while not isOpcodesAvailable() do wait(100) end
-	-- sampRegisterChatCommand("quitFFB",function() ACTIVE = false ffb = nil end)
 	
 	-- ffb.SpawnConsole()
 	while ACTIVE do  
@@ -239,7 +202,7 @@ function main()
 			end
 			
 		end
-		if isKeyDown(KEY.VK_MENU) and wasKeyPressed(KEY.VK_F6) and not sampIsChatInputActive() then 
+		if isKeyDown(KEY.VK_MENU) and wasKeyPressed(KEY.VK_F6) then 
 			Enabled = not Enabled
 			-- if not ConsoleCreated then ffb.SpawnConsole() ConsoleCreated = true end 
 			if Enabled then ffb.FreeDirectInput() ffb.Init()   else ffb.FreeDirectInput() end  
